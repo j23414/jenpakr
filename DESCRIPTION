@@ -1,0 +1,24 @@
+Package: jenplots
+Title: A set of plots for HI data
+Version: 0.0.0000
+Authors@R: c(
+    person(given = "Jennifer",
+           family = "Chang",
+           role = c("aut", "cre"),
+           email = "jennifer.chang@usda.gov")
+    )
+Description: reusable HI plots
+License: MIT + file LICENSE
+Imports:
+  cowplot,
+  dplyr,
+  ggplot2,
+  magrittr,
+  reshape2
+Encoding: UTF-8
+RoxygenNote: 7.0.2
+Suggests:
+  knitr,
+  rmarkdown,
+  ggnewscale
+VignetteBuilder: knitr

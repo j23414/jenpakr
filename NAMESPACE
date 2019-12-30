@@ -2,3 +2,4 @@
 
 export(HI_to_GMT)
 export(corrplot)
+export(violinplot)

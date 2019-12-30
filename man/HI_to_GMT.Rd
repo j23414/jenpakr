@@ -15,3 +15,6 @@ The GMT titer = log(HI titer/ 10, 2)
 \description{
 Converts HI Titer values to generalized mean titer (GMT)
 }
+\examples{
+HI_to_GMT(c(1:10*100))
+}

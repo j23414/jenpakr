@@ -1,4 +1,4 @@
-# jenpakr
+# Collection of plotting functions
 
 HI Titer plots, rename this later. 
 

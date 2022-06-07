@@ -17,10 +17,9 @@ Imports:
   reshape2,
   tidyverse
 Encoding: UTF-8
-RoxygenNote: 7.0.2
+RoxygenNote: 7.2.0
 Suggests:
   knitr,
   rmarkdown,
   ggnewscale
 VignetteBuilder: knitr
-

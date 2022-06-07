@@ -3,3 +3,5 @@
 export(HI_to_GMT)
 export(corrplot)
 export(violinplot)
+export(format_vipr_date)
+export(format_ncbi_date)

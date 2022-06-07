@@ -1,4 +1,4 @@
-Package: jenplots
+Package: jenpakr
 Title: A set of plots for HI data
 Version: 0.0.0000
 Authors@R: c(
@@ -14,7 +14,8 @@ Imports:
   dplyr,
   ggplot2,
   magrittr,
-  reshape2
+  reshape2,
+  tidyverse
 Encoding: UTF-8
 RoxygenNote: 7.0.2
 Suggests:

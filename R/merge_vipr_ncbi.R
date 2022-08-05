@@ -17,6 +17,26 @@ library(magrittr)
 
 # === Functions
 
+#' Read in delimited data
+#' Drop any empty columns
+#' Remove spaces from column names
+#' @param filename Character vector containing path to file
+#' @param delim Delimiter of file, tab by default
+#' @param type Basic is a basic delimited file, but special handling for ncbi or vipr
+#' @return The cleaned dataframe
+#' @export
+read_delim_file <- function(filename, delim="\t", type="basic") {
+  df <- readr::read_delim(filename, delim=delim, col_types = cols(.default = "c")) %>%
+    discard(~all(is.na(.) | . == "" | . == "-N/A-"))
+  names(df) = names(df) %>% tolower(.) %>% gsub(" ", "_", .)
+  if(type=="vipr") {
+    df$collection_date = df$collection_date %>% format_vipr_date(.)
+    df$virus_type=NULL
+    df$mol_type=NULL
+  }
+  return(df)
+}
+
 #' Format ViPR dates (MM/DD/YYYY) into some form of YYYY-MM-DD, with unknown set to XX
 #' @param vc Character vector containing the vipr date such as "01/30/2022" or "01/2022"
 #' @param delim Delimiter of date values, which is "/" by default but could also be "-"

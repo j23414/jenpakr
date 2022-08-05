@@ -6,7 +6,7 @@
 Drop any empty columns
 Remove spaces from column names}
 \usage{
-read_delim_file(filename, delim = "\\t", type = "basic")
+read_delim_file(filename, delim = "\\t", type = "basic", col_names = TRUE)
 }
 \arguments{
 \item{filename}{Character vector containing path to file}

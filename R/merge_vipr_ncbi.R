@@ -3,39 +3,7 @@
 library(tidyverse)
 library(magrittr)
 
-# # === Inputs
-# VIPR_FILE="vipr.tsv"
-# NCBI_FILE="ncbi.csv"
-# 
-# vipr <- readr::read_delim(VIPR_FILE, delim="\t")
-# ncbi <- readr::read_delim(NCBI_FILE, delim=",")
-# 
-# (names(vipr) = gsub(" ","_", names(vipr)))
-# (names(ncbi) = gsub(" ","_", names(ncbi)))
-# 
-# vipr[vipr == "-N/A-"] <- NA
-
 # === Functions
-
-#' Read in delimited data
-#' Drop any empty columns
-#' Remove spaces from column names
-#' @param filename Character vector containing path to file
-#' @param delim Delimiter of file, tab by default
-#' @param type Basic is a basic delimited file, but special handling for ncbi or vipr
-#' @return The cleaned dataframe
-#' @export
-read_delim_file <- function(filename, delim="\t", type="basic") {
-  df <- readr::read_delim(filename, delim=delim, col_types = cols(.default = "c")) %>%
-    discard(~all(is.na(.) | . == "" | . == "-N/A-"))
-  names(df) = names(df) %>% tolower(.) %>% gsub(" ", "_", .)
-  if(type=="vipr") {
-    df$collection_date = df$collection_date %>% format_vipr_date(.)
-    df$virus_type=NULL
-    df$mol_type=NULL
-  }
-  return(df)
-}
 
 #' Format ViPR dates (MM/DD/YYYY) into some form of YYYY-MM-DD, with unknown set to XX
 #' @param vc Character vector containing the vipr date such as "01/30/2022" or "01/2022"
@@ -44,8 +12,11 @@ read_delim_file <- function(filename, delim="\t", type="basic") {
 #' @export
 format_vipr_date <- function(vc, delim="/"){
   # If vc is NA, return early
-  if(is.na(vc)){
-    return(vc)
+  if (is.na(vc)){
+    return("XXXX-XX-XX")
+  }
+  if ( vc == "-N/A-") {
+    return("XXXX-XX-XX")
   }
   # If vc is delimited
   if (grepl(delim, vc)) {
@@ -53,13 +24,13 @@ format_vipr_date <- function(vc, delim="/"){
       stringr::str_split(., delim, simplify = T) %>%
       as.vector(.)
     # MM/DD/YYYY
-    if(length(vc_temp)==3){
+    if (length(vc_temp)==3){
       vc <- vc_temp %>% 
         { c(.[3], .[1], .[2]) } %>%
         paste(., collapse = "-", sep = "")
     }
     # MM/YYYY
-    if(length(vc_temp)==2){
+    if (length(vc_temp)==2){
       vc <- vc_temp %>% 
         { c(.[2], .[1] , "XX") } %>%
         paste(., collapse = "-", sep = "")
@@ -68,7 +39,7 @@ format_vipr_date <- function(vc, delim="/"){
     return(vc)
   }
   # YYYY
-  if(str_length(vc)==4){
+  if (str_length(vc)==4){
     return(paste(vc, "-XX-XX", sep=""))
   }
   # If not recognized, return original date string
@@ -130,6 +101,51 @@ guess_genotype <- function(strain){
 }
 
 
+#' Read in delimited data
+#' Drop any empty columns
+#' Remove spaces from column names
+#' @param filename Character vector containing path to file
+#' @param delim Delimiter of file, tab by default
+#' @param type Basic is a basic delimited file, but special handling for ncbi or vipr
+#' @return The cleaned dataframe
+#' @export
+read_delim_file <- function(filename, delim="\t", type="basic", col_names=TRUE) {
+  df <- readr::read_delim(
+    filename, 
+    delim=delim,
+    col_names=col_names,
+    col_types = cols(.default = "c")                  # convert to characters
+  ) %>%
+    discard(~all(is.na(.) | . == "" | . == "-N/A-"))  # drop empty cols
+  
+  isNAtable = df == "-N/A-"
+  df[isNAtable] = NA
+  
+  # Format Column names
+  names(df) = names(df) %>% 
+    tolower(.) %>% 
+    gsub(" ", "_", .)
+  
+  # VIPR specific
+  if(type == "vipr") {
+    df = df %>%
+      group_by(genbank_accession) %>%
+      mutate(
+        collection_date = collection_date %>% format_vipr_date(vc=., delim="/"),
+        genbank=genbank_accession,
+        genotype_vipr=`subtype/genotype_(vipr)`
+      ) %>%
+      ungroup(.) %>%
+      select(-genbank_accession, -`subtype/genotype_(vipr)`, -virus_type, -mol_type) %>%
+      select(genbank, collection_date, strain_name, country, everything())
+  }
+  
+  # Fauna specific
+  
+  return(df)
+}
+
+
 #' Helps harmonize or expand column names, preparing for a summarize merge later
 #' @param data Data frame
 #' @param cname Vector of strings of column names that need to exist in data frame
@@ -163,6 +179,22 @@ uniqMerge <- function(vc, delim = ",") {
       paste(., collapse = delim, sep = "")
   }
   return(vc)
+}
+
+#' Merge two dataframes
+#' @param one_df Vector of values for a particular column
+#' @param two_df Delimiter between unique values, will split original string into delims, and smash them together again
+#' @return Merged data frame
+#' @export
+merge_two <- function(one_df, two_df) {
+  one = fncols(one_df, names(two_df))
+  two = fncols(two_df, names(one_df)) %>%
+    select(names(one))
+  all = rbind(one, two) %>%
+    group_by(genbank) %>%
+    summarize_at(., vars(-group_cols()), uniqMerge) %>%
+    ungroup(.)
+  return(all)
 }
 
 # # === Clean Data

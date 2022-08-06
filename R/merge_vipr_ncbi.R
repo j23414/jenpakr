@@ -141,6 +141,20 @@ read_delim_file <- function(filename, delim="\t", type="basic", col_names=TRUE) 
   }
   
   # Fauna specific
+  if(type == "fauna") {
+    df = df %>%
+      mutate(
+        genbank=accession,
+        accession=NULL,
+        virus=NULL,
+        db=NULL,
+        segment=NULL,
+        collection_date=date,
+        strain_name=strain,
+        date=NULL,
+        strain=NULL
+        )
+  }
   
   return(df)
 }

@@ -15,3 +15,34 @@ For the plots, the expected input should be an excell file containing HI Titer V
 | Strain1 |   |   |   |   |
 | Strain2 |   |   |   |   |
 | Strain3 |   |   |   |   |
+
+
+# Reusable functions
+
+```
+library(jenpakr)
+library(readxl)
+library(tidyverse)
+library(magrittr)
+
+# ================= Read in Data to merge
+
+# Normal excell cache
+cache_data <- readxl::read_excell("path/to/cache.xlsx")
+
+# Possible special cases
+vipr_data <- jenpakr::read_delim_file("path/to/vipr.tsv", type="vipr")
+ncbi_data <- jenpakr::read_delim_file("path/to/ncbi.tsv")
+fauna_data <- jenpakr::read_delim_file("path/to/fauna.tsv", type="fauna")
+clades_data <- jenpakr::read_delim_file("path/to/clades.csv", delim=",")
+
+# ================== Merge files
+merged_df <- cache_data %>%
+  jenpakr::merge_two(., vipr_data) %>%
+  jenpakr::merge_two(., ncbi_data) %>%
+  jenpakr::merge_two(., fauna_data) %>%
+  jenpakr::merge_two(., clades_data)
+
+# ================== Save new cache
+writexl::write_xlsx(merged_df, "new_cache.xlsx")
+```

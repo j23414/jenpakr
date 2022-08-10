@@ -7,9 +7,9 @@
 merge_two(one_df, two_df)
 }
 \arguments{
-\item{one_df}{Vector of values for a particular column}
+\item{one_df}{First data frame to merge, col names will be listed first.}
 
-\item{two_df}{Delimiter between unique values, will split original string into delims, and smash them together again}
+\item{two_df}{Second data frame to merge, col names will be harmonized with first.}
 }
 \value{
 Merged data frame

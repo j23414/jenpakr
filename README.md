@@ -6,6 +6,12 @@ HI Titer plots, rename this later.
 devtools::install_github("j23414/jenpakr")
 ```
 
+During development, follow the [R Package Development Protocol](https://raw.githubusercontent.com/rstudio/cheatsheets/main/package-development.pdf).
+
+```
+devtools::load_all("~/github/j23414/jenpakr") # Or path to your code base
+```
+
 # Expected Input
 
 For the plots, the expected input should be an excell file containing HI Titer Values in a table.
@@ -27,8 +33,8 @@ library(magrittr)
 
 # ================= Read in Data to merge
 
-# Normal excell cache
-cache_data <- readxl::read_excell("path/to/cache.xlsx")
+# Normal excel cache
+cache_data <- readxl::read_excel("path/to/cache.xlsx")
 
 # Possible special cases
 vipr_data <- jenpakr::read_delim_file("path/to/vipr.tsv", type="vipr")

@@ -67,29 +67,6 @@ format_ncbi_date <- function(vc){
   return(vc)
 }
 
-# This is pathogen specific
-#guess_name <- function(gb_title){
-#  if(grepl("Human orthopneumovirus strain ", gb_title)){
-#    new_name = gb_title %>%
-#      gsub("Human orthopneumovirus strain ","", .) %>%
-#      gsub(",.*","", .) 
-#    return(new_name)
-#  }
-#  if(grepl("Human respiratory syncytial virus A strain ", gb_title)){
-#    new_name = gb_title %>%
-#      gsub("Human respiratory syncytial virus A strain ", "", .) %>%
-#      gsub(",.*", "", .)
-#    return(new_name)
-#  }
-#  if(grepl("Human respiratory syncytial virus B strain ", gb_title)){
-#    new_name = gb_title %>%
-#      gsub("Human respiratory syncytial virus B strain ", "", .) %>%
-#      gsub(",.*", "", .)
-#    return(new_name)
-#  }
-#  return("")
-#}
-# 
 # # TODO: generalize this, read in dictionary haha
 # guess_genotype <- function(strain){
 #   if(grepl("RSVA", strain) | grepl("RSV_A", strain) | grepl("RSV-A", strain) | grepl("/A/", strain)){
@@ -117,9 +94,11 @@ read_delim_file <- function(filename, delim="\t", type="basic", col_names=TRUE) 
     col_names=col_names,
     col_types = cols(.default = "c")                  # convert to characters
   ) %>%
-    discard(~all(is.na(.) | . == "" | . == "-N/A-"))  # drop empty cols
+    discard(~all(is.na(.) | . == "" | . == "-N/A-"| . == "?"))  # drop empty cols
   
   isNAtable = df == "-N/A-"
+  df[isNAtable] = NA
+  isNAtable = df == "?"
   df[isNAtable] = NA
   
   # Format Column names
@@ -155,6 +134,29 @@ read_delim_file <- function(filename, delim="\t", type="basic", col_names=TRUE) 
         date=NULL,
         strain=NULL
         )
+  }
+  
+  if(type == "ncbi") {
+    df = df %>%
+      group_by(accession) %>%
+      mutate(
+        collection_date = collection_date %>% format_ncbi_date(vc=.),
+        genbank=accession,
+        species=NULL,
+        genus=NULL,
+        family=NULL,
+        molecule_type=NULL,
+        sequence_type=NULL,
+        strain_name=case_when( grepl("strain", genbank_title) ~ gsub(".*strain ","",genbank_title) %>% 
+                                                                gsub(", complete genome","",.) %>%
+                                                                gsub(", partial genome","",.)),
+        genotype=case_when(!is.na(genotype) ~ genotype,
+                           grepl("genotype", genbank_title) ~ gsub(".*genotype ","",genbank_title) %>% 
+                             gsub(" .*","",.))
+      ) %>%
+      ungroup(.) %>%
+      select(-accession) %>%
+      select(genbank, collection_date, country, everything())
   }
   
   return(df)

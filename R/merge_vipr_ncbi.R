@@ -186,8 +186,6 @@ uniqMerge <- function(vc, delim = ",") {
     stringi::stri_remove_empty_na(.) %>%
     unique(.) %>%
     paste(., collapse = delim, sep = "")
-  # Split, unique, delim
-  # todo: refactor
   if (grepl(delim, vc)) {
     vc <- vc %>%
       stringr::str_split(., delim, simplify = T) %>%

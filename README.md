@@ -14,7 +14,7 @@ devtools::load_all("~/github/j23414/jenpakr") # Or path to your code base
 
 # Expected Input
 
-For the plots, the expected input should be an excell file containing HI Titer Values in a table.
+For the HI plots, the expected input should be an excel file containing HI Titer Values in a table.
 
 |   | Strain1 | Strain2 | Strain3 | Strain4 |
 |---|---|---|---|---|
@@ -23,7 +23,7 @@ For the plots, the expected input should be an excell file containing HI Titer V
 | Strain3 |   |   |   |   |
 
 
-# Reusable functions
+# Merging Datasets
 
 ```
 library(jenpakr)
